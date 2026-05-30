@@ -1,0 +1,40 @@
+from langchain_groq import ChatGroq
+import dotenv
+import os
+dotenv.load_dotenv()  # Load environment variables from .env file
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise EnvironmentError(
+        "GROQ_API_KEY is not set. Add it to a .env file or set the environment variable GROQ_API_KEY."
+    )
+
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+
+# Define the AI's persona
+system_prompt = "You are a helpful assistant who is an expert in computer science. You explain things simply but accurately."
+model = ChatGroq(api_key=GROQ_API_KEY, model="llama-3.1-8b-instant")
+# Initialize conversation history with the system prompt
+history = [SystemMessage(content=system_prompt)]
+
+print("Chat started with Persona and Memory! (Type 'exit' to stop)")
+
+while True:
+    user_input = input("You: ")
+    
+    if user_input.lower() in ['exit', 'quit', 'bye']:
+        print("Chat ended.")
+        break
+    
+    # Add user message to history
+    history.append(HumanMessage(content=user_input))
+    
+    try:
+        # Pass the full history (including system prompt) to the model
+        response = model.invoke(history)
+        
+        # Add AI response to history
+        history.append(AIMessage(content=response.content))
+        
+        print(f"Groq: {response.content}\n")
+    except Exception as e:
+        print(f"Error: {e}")
